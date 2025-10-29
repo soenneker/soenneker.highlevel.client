@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../soenneker.highlevel.clientutil"
+		},
+		{
+			"path": "../soenneker.highlevel.contacts"
+		},
+		{
+			"path": "../soenneker.highlevel.openapiclient"
+		},
+		{
+			"path": "../soenneker.highlevel.runners.openapiclient"
+		},
+		{
+			"path": "../../Instantly/soenneker.instantly.leads"
+		}
+	]
+}
