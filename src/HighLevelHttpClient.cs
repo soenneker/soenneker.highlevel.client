@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
     private readonly IHttpClientCache _httpClientCache;
     private readonly string _version;
 
-    private const string _prodBaseUrl = "https://services.leadconnectorhq.com/";
+    private static readonly Uri _prodBaseUrl = new("https://services.leadconnectorhq.com/", UriKind.Absolute);
 
     public HighLevelHttpClient(IHttpClientCache httpClientCache, IConfiguration config)
     {
@@ -25,17 +26,15 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        return _httpClientCache.Get(nameof(HighLevelHttpClient), () => {
-            var options = new HttpClientOptions
+        // No closure: state passed explicitly + static lambda
+        return _httpClientCache.Get(nameof(HighLevelHttpClient), (prodBaseUrl: _prodBaseUrl, version: _version), static state => new HttpClientOptions
+        {
+            BaseAddress = state.prodBaseUrl,
+            DefaultRequestHeaders = new Dictionary<string, string>
             {
-                BaseAddress = _prodBaseUrl,
-                DefaultRequestHeaders = new Dictionary<string, string>
-                {
-                    {"Version", _version}
-                }
-            };
-            return options;
-        }, cancellationToken: cancellationToken);
+                {"Version", state.version}
+            }
+        }, cancellationToken);
     }
 
     public void Dispose()
