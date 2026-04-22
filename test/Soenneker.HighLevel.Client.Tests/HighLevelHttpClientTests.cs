@@ -1,20 +1,19 @@
-﻿using Soenneker.HighLevel.Client.Abstract;
-using Soenneker.Tests.FixturedUnit;
-using Xunit;
+using Soenneker.HighLevel.Client.Abstract;
+using Soenneker.Tests.HostedUnit;
 
 namespace Soenneker.HighLevel.Client.Tests;
 
-[Collection("Collection")]
-public sealed class HighLevelHttpClientTests : FixturedUnitTest
+[ClassDataSource<Host>(Shared = SharedType.PerTestSession)]
+public sealed class HighLevelHttpClientTests : HostedUnitTest
 {
     private readonly IHighLevelHttpClient _httpclient;
 
-    public HighLevelHttpClientTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public HighLevelHttpClientTests(Host host) : base(host)
     {
         _httpclient = Resolve<IHighLevelHttpClient>(true);
     }
 
-    [Fact]
+    [Test]
     public void Default()
     {
 
