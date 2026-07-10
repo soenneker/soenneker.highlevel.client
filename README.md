@@ -11,3 +11,9 @@
 ```
 dotnet add package Soenneker.HighLevel.Client
 ```
+
+The parameterless `Get()` returns the shared unauthenticated transport. To work directly with one or more HighLevel accounts or tenants, pass each API key explicitly:
+
+```csharp
+HttpClient tenantClient = await highLevelHttpClient.Get(tenantApiKey);
+```

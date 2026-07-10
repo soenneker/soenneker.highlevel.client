@@ -16,4 +16,12 @@ public interface IHighLevelHttpClient: IDisposable, IAsyncDisposable
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task containing the result of the operation.</returns>
     ValueTask<HttpClient> Get(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a client configured for a specific HighLevel API key.
+    /// </summary>
+    /// <param name="apiKey">The HighLevel API key.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task containing the configured client.</returns>
+    ValueTask<HttpClient> Get(string apiKey, CancellationToken cancellationToken = default);
 }

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Soenneker.Dtos.HttpClientOptions;
+using Soenneker.Hashing.XxHash;
 using Soenneker.HighLevel.Client.Abstract;
 using Soenneker.Utils.HttpClientCache.Abstract;
 
@@ -15,6 +17,7 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly string _version;
+    private readonly ConcurrentDictionary<string, byte> _clientIds = new();
 
     private static readonly Uri _prodBaseUrl = new("https://services.leadconnectorhq.com/", UriKind.Absolute);
 
@@ -37,20 +40,48 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
         }, cancellationToken);
     }
 
+    public ValueTask<HttpClient> Get(string apiKey, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
+
+        string clientId = $"{nameof(HighLevelHttpClient)}:{XxHash3Util.Hash(apiKey)}";
+        _clientIds.TryAdd(clientId, 0);
+
+        return _httpClientCache.Get(clientId, (apiKey, version: _version), static state => new HttpClientOptions
+        {
+            BaseAddress = _prodBaseUrl,
+            DefaultRequestHeaders = new Dictionary<string, string>
+            {
+                {"Authorization", $"Bearer {state.apiKey}"},
+                {"Version", state.version}
+            }
+        }, cancellationToken);
+    }
+
     /// <summary>
     /// Releases resources used by the current instance.
     /// </summary>
     public void Dispose()
     {
         _httpClientCache.RemoveSync(nameof(HighLevelHttpClient));
+
+        foreach (string clientId in _clientIds.Keys)
+        {
+            _httpClientCache.RemoveSync(clientId);
+        }
     }
 
     /// <summary>
     /// Asynchronously releases resources used by the current instance.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
-        return _httpClientCache.Remove(nameof(HighLevelHttpClient));
+        await _httpClientCache.Remove(nameof(HighLevelHttpClient));
+
+        foreach (string clientId in _clientIds.Keys)
+        {
+            await _httpClientCache.Remove(clientId);
+        }
     }
 }
