@@ -12,12 +12,12 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.HighLevel.Client;
 
-///<inheritdoc cref="IHighLevelHttpClient"/>
 public sealed class HighLevelHttpClient : IHighLevelHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
     private readonly string _version;
     private readonly ConcurrentDictionary<string, byte> _clientIds = new();
+    private readonly string _cachePrefix = $"{nameof(HighLevelHttpClient)}:{Guid.NewGuid():N}";
 
     private static readonly Uri _prodBaseUrl = new("https://services.leadconnectorhq.com/", UriKind.Absolute);
 
@@ -29,8 +29,7 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
 
     public ValueTask<HttpClient> Get(CancellationToken cancellationToken = default)
     {
-        // No closure: state passed explicitly + static lambda
-        return _httpClientCache.Get(nameof(HighLevelHttpClient), (prodBaseUrl: _prodBaseUrl, version: _version), static state => new HttpClientOptions
+        return _httpClientCache.Get(_cachePrefix, (prodBaseUrl: _prodBaseUrl, version: _version), static state => new HttpClientOptions
         {
             BaseAddress = state.prodBaseUrl,
             DefaultRequestHeaders = new Dictionary<string, string>
@@ -44,7 +43,7 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(apiKey);
 
-        string clientId = $"{nameof(HighLevelHttpClient)}:{XxHash3Util.Hash(apiKey)}";
+        string clientId = $"{_cachePrefix}:{XxHash3Util.Hash(apiKey)}";
         _clientIds.TryAdd(clientId, 0);
 
         return _httpClientCache.Get(clientId, (apiKey, version: _version), static state => new HttpClientOptions
@@ -63,7 +62,7 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
     /// </summary>
     public void Dispose()
     {
-        _httpClientCache.RemoveSync(nameof(HighLevelHttpClient));
+        _httpClientCache.RemoveSync(_cachePrefix);
 
         foreach (string clientId in _clientIds.Keys)
         {
@@ -77,7 +76,7 @@ public sealed class HighLevelHttpClient : IHighLevelHttpClient
     /// <returns>A task that represents the asynchronous operation.</returns>
     public async ValueTask DisposeAsync()
     {
-        await _httpClientCache.Remove(nameof(HighLevelHttpClient));
+        await _httpClientCache.Remove(_cachePrefix);
 
         foreach (string clientId in _clientIds.Keys)
         {

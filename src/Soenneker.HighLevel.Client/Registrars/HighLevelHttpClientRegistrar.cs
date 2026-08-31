@@ -6,7 +6,7 @@ using Soenneker.Utils.HttpClientCache.Registrar;
 namespace Soenneker.HighLevel.Client.Registrars;
 
 /// <summary>
-/// A .NET thread-safe singleton HttpClient for GitHub
+/// Registers the cached HighLevel HTTP client provider.
 /// </summary>
 public static class HighLevelHttpClientRegistrar
 {

@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <Description>A .NET thread-safe singleton HttpClient for HighLevel.</Description>
+        <Description>Provides cached HighLevel HTTP clients with optional per-API-key authentication</Description>
         <Version Condition="'$(BUILD_VERSION)' == ''">4.0.0</Version>
         <Version Condition="'$(BUILD_VERSION)' != ''">$(BUILD_VERSION)</Version>
         <AssemblyName>Soenneker.HighLevel.Client</AssemblyName>

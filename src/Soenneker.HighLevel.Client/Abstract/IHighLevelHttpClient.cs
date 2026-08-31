@@ -6,12 +6,12 @@ using System.Threading;
 namespace Soenneker.HighLevel.Client.Abstract;
 
 /// <summary>
-/// A .NET thread-safe singleton HttpClient for 
+/// Provides cached HighLevel HTTP clients with optional per-API-key authentication.
 /// </summary>
 public interface IHighLevelHttpClient: IDisposable, IAsyncDisposable
 {
     /// <summary>
-    /// Gets the value.
+    /// Gets the shared unauthenticated HighLevel transport.
     /// </summary>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task containing the result of the operation.</returns>
