@@ -12,6 +12,7 @@ using Soenneker.Utils.HttpClientCache.Abstract;
 
 namespace Soenneker.HighLevel.Client;
 
+/// <inheritdoc cref="IHighLevelHttpClient" />
 public sealed class HighLevelHttpClient : IHighLevelHttpClient
 {
     private readonly IHttpClientCache _httpClientCache;
